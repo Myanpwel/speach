@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Voice</title>
+</head>
+<body>
+	
+	<h1>Voice speech</h1>
+
+	<script>
+	function speak(text, callback) {
+	    var u = new SpeechSynthesisUtterance();
+	    u.text = text;
+	    u.lang = 'en-US';
+	 
+	    u.onend = function () {
+	        if (callback) {
+	            callback();
+	        }
+	    };
+	 
+	    u.onerror = function (e) {
+	        if (callback) {
+	            callback(e);
+	        }
+	    };
+	 
+	    speechSynthesis.speak(u);
+	}
+
+	ask('What is your favorite color?', function (err, result) {
+		speak('Your favorite color is' + result);
+
+		console.log('Result ' + result);
+		console.log('Error ' + err);
+	});
+	 
+	 
+	// ask a question and get an answer
+	function ask(text, callback) {
+	    // ask question
+	    speak(text, function () {
+	        // get answer
+	        var recognition = new webkitSpeechRecognition();
+	        recognition.continuous = false;
+	        recognition.interimResults = false;
+	 
+	        recognition.onend = function (e) {
+	            if (callback) {
+	                callback('no results');
+	            }
+	        };
+	 
+	 
+	        recognition.onresult = function (e) {
+	            // cancel onend handler
+	            recognition.onend = null;
+	            if (callback) {
+	                callback(null, {
+	                    transcript: e.results[0][0].transcript,
+	                    confidence: e.results[0][0].confidence
+	                });
+	            }
+	        }
+	 
+	        // start listening
+	        recognition.start();
+	    });
+	}
+	</script>
+</body>
+</html>
